@@ -5,13 +5,15 @@ StepperMotor::StepperMotor()
 {  
 }
 
-StepperMotor::StepperMotor(int posPin, int stepPin, int encMin, int encMax)
+StepperMotor::StepperMotor(int posPin, int stepPin, int encMin, int encMax, int stepDelay)
 {  
   _posPin = posPin;
   _stepPin = stepPin;  
   
   _encMin = encMin;
   _encMax = encMax;
+  
+  _stepDelay = stepDelay;
   
   pinMode(_posPin, INPUT);
   pinMode(_stepPin, OUTPUT);
@@ -49,7 +51,6 @@ int StepperMotor::limitPos(int posBit) {
 
 bool StepperMotor::goToPos(int desAngBit) {
 	bool isCW = (desAngBit < getPos());
-	
 	return goToPos(desAngBit, isCW);
 }
 
@@ -81,9 +82,9 @@ bool StepperMotor::goToPos(int desPosBit, bool isCW) {
 			return FAIL;
 		}
 		else if(abs(curPosBit - desPosBit) < 5)
-			_performStep(STEP_DELAY*2); 
+			_performStep(_stepDelay*2); 
 		else
-			_performStep(STEP_DELAY); 
+			_performStep(_stepDelay); 
 		
 		curPosBit = getPos();
 		// Serial.println(curPosBit);

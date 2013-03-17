@@ -11,7 +11,7 @@ class StepperMotor
 {  
   public:
     StepperMotor();
-    StepperMotor(int posPin, int stepPin, int encMin, int encMax);
+    StepperMotor(int posPin, int stepPin, int encMin, int encMax, int stepDelay);
 	
     int getPos();           //return position in bits
 	bool isValidPos(int posBit);
@@ -28,6 +28,7 @@ class StepperMotor
     int _stepPin;  
 	int _encMin;
 	int _encMax;
+	int _stepDelay;
 	
 	bool _isPitch;
 };

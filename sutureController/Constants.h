@@ -14,7 +14,7 @@ const boolean FAIL       = false;
 const boolean PASS       = true;
 
 /********************** PRINT CONSTANTS ****************************/
-
+int amod(int a, int b);
 // void debug(String message);
 // void debugln(String message);
 // void debug(char* message);
@@ -49,20 +49,24 @@ const int PITCH_CURLED          = 700;   //fully curled position
 const int PITCH_STRAIGHT_ANG    = 2;  	//fully straight angle (for conversion)
 const int PITCH_CURLED_ANG      = 80;   //fully curled angle (for conversion)
 
-const double PITCH_BIT_TO_DEG = float((PITCH_CURLED_ANG - PITCH_STRAIGHT_ANG))/(PITCH_STRAIGHT - PITCH_CURLED);
+const double PITCH_BIT_TO_DEG = float((PITCH_CURLED_ANG - PITCH_STRAIGHT_ANG))/(PITCH_CURLED - PITCH_STRAIGHT);
 
 /************************** ROLL *************************************/ 
-const int ROLL_W_POS_PIN     = A5;  //Stepper #3
-const int ROLL_W_STEP_PIN    = 12;  //Stepper #3
-const bool ROLL_W_CW 	  	 = true;
-const int ROLL_O_POS_PIN     = A4;  //Stepper #2  
-const int ROLL_O_STEP_PIN    = 10;  //Stepper #2
-const bool ROLL_O_CW 	  	 = true;
-const int ROLL_MIN           = 0;          
-const int ROLL_MAX           = 1023;
+const int ROLL_W_POS_PIN    = A5;  	//Stepper #3
+const int ROLL_W_STEP_PIN   = 12;  	//Stepper #3
+const bool ROLL_W_CW 	  	= true;
+const int ROLL_W_OFFSET	 	= -15;	//Angular offset
 
-const int ROLL_MIN_ANGLE     = 0;
-const int ROLL_MAX_ANGLE     = 360;
+const int ROLL_O_POS_PIN    = A4;  	//Stepper #2  
+const int ROLL_O_STEP_PIN   = 10;  	//Stepper #2
+const bool ROLL_O_CW 	  	= false;
+const int ROLL_O_OFFSET	 	= 160;	//Angular offset
+
+const int ROLL_MIN          = 0;          
+const int ROLL_MAX          = 1023;
+
+const int ROLL_MIN_ANGLE    = 0;
+const int ROLL_MAX_ANGLE    = 360;
 const double ROLL_BIT_TO_DEG = float((ROLL_MAX_ANGLE - ROLL_MIN_ANGLE))/(ROLL_MAX - ROLL_MIN);
 
 
@@ -86,7 +90,7 @@ const double TOG_BIT_TO_MM   = 20.0/983;
 /************************ GRIPPER **********************************/ 
 const int GRIP_EN_PIN        = 4;
 const int GRIP_POS_PIN       = A1;   //#3 - big pops
-const int GRIP_OPEN       	 = 150; 
+const int GRIP_OPEN       	 = 150; 	//150
 const int GRIP_CLOSED        = 38; 
 
 const int GRIP_DUTY_ON	 	 = 10;	

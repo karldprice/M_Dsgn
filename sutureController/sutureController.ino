@@ -1,5 +1,6 @@
 #include "Constants.h"
 #include "FYDPMenu.h"
+// #include "MemoryFree.h"
 
 FYDPMenu menu;
 // int inpt;
@@ -7,7 +8,7 @@ FYDPMenu menu;
 void setup()
 {     
 	// Serial.begin(4800);
-	Serial.begin(9600);
+	Serial.begin(57600);
 
 	pinMode(LIN_DIR_PIN, OUTPUT);  
 	digitalWrite(LIN_DIR_PIN, LOW);
@@ -65,7 +66,7 @@ void loop()
     menu.resetMenu();
   }
   else if (menu.cmdReady()) {
-    // Serial.println(menu.getParam(0) + "," + menu.getParam(1) + "," + menu.getParam(2));
+    Serial.println(menu.getParam(0) + "," + menu.getParam(1) + "," + menu.getParam(2));
     
     //Handle new command. True implies error
     if(menu.handleInput(menu.getParam(0), menu.getParam(1), menu.getParam(2)) == FAIL)
@@ -75,7 +76,10 @@ void loop()
     printWelcome();
   }
 
-  delay(1000);                  
+  delay(1000);   
+
+	// Serial.print("freeMemory()=");
+    // Serial.println(freeMemory());  
 }
 
 void menuError()                //Fire upon error processing serial input
@@ -94,6 +98,15 @@ void printWelcome()
   else { 
     Serial.println("\n\nPlease select a function: {Pitch (p), Wrist Roll (wr), Outer Roll (or), or Toggle Needle (t)}, {Desired Angle (if necessary)}"); 
   }
+}
+
+//Absolute modulus
+int amod(int a, int b)
+{
+   int ret = a % b;
+   if(ret < 0)
+     ret+=b;
+   return ret;
 }
 
 // void debug(String message) { 
