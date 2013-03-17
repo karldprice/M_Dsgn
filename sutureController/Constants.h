@@ -31,7 +31,7 @@ const int T2 	  = 4;
 const int GRIP 	  = 5;
 
 //const int MAX_REACHED_COUNT = 50;
-const int NED_TOL        = 10; 
+const int NED_TOL        = 5; 
 const int GRIP_TOL       = 5;
 const int STEP_TOL       = 5; //in case encoder skips over the one required value
 
@@ -39,17 +39,15 @@ const int STEP_NSLEEP    = 8;
 const int STEP_DIR       = 9;
 
 /********************** STEPPER MOTORS *******************************/  
-const int STEP_DELAY = 5;   
+const int STEP_DELAY = 5;
 
 /************************** PITCH ************************************/ 
 const int PITCH_POS_PIN         = A3;  //Stepper #1
 const int PITCH_STEP_PIN        = 11;  //Stepper #1
-
 const int PITCH_STRAIGHT		= 440;  	//fully straight position
 const int PITCH_CURLED          = 700;   //fully curled position      
-
 const int PITCH_STRAIGHT_ANG    = 2;  	//fully straight angle (for conversion)
-const int PITCH_CURLED_ANG      = 80;   //fully curled angle (for conversion)  
+const int PITCH_CURLED_ANG      = 80;   //fully curled angle (for conversion)
 
 const double PITCH_BIT_TO_DEG = float((PITCH_CURLED_ANG - PITCH_STRAIGHT_ANG))/(PITCH_STRAIGHT - PITCH_CURLED);
 
@@ -59,6 +57,7 @@ const int ROLL_W_STEP_PIN    = 12;  //Stepper #3
 const bool ROLL_W_CW 	  	 = true;
 const int ROLL_O_POS_PIN     = A4;  //Stepper #2  
 const int ROLL_O_STEP_PIN    = 10;  //Stepper #2
+const bool ROLL_O_CW 	  	 = true;
 const int ROLL_MIN           = 0;          
 const int ROLL_MAX           = 1023;
 
@@ -79,7 +78,7 @@ const int TOG2_ENGAGE        = 398;
 const int TOG2_DISENGAGE     = 290;
 
 const int LIN_DUTY_ON	 	= 5;	
-const int LIN_DUTY_OFF	 	= 10;	
+const int LIN_DUTY_OFF	 	= 50;	
 
 const int LIN_DIR_PIN        = 7;
 const double TOG_BIT_TO_MM   = 20.0/983;

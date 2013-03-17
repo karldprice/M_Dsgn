@@ -116,7 +116,7 @@ bool LinearActuator::goToPos(int desPosBit)
 		
 		curPosBit = getPos();
 		// debug("pos - ");
-		// debugln((String)curPosBit);
+		debugln((String)curPosBit);
 	}
 }
 

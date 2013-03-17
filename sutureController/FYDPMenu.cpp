@@ -117,10 +117,20 @@ boolean FYDPMenu::handleInput(String pFunc, String pDir, String pValue)
  
 	int pVal = pValue.toInt();
 	
-	boolean isBits = false;
+	boolean isMM = false;
+	boolean isDeg = false;
 	boolean posDir = false;
 	
 	String dirStr = pDir.substring(0,1);
+	String unitStr = "";
+	
+	if(pDir.length() > 1)
+		if(pDir.substring(1,2) == "M")
+			isMM = true;
+		else if(pDir.substring(1,2) == "D")
+			isDeg = true;
+		else
+			_setError("Invalid direction parameter");
 
 	//If NOT needle or check
 	// if(pFunc != "N" && pFunc != "C" && pFunc != "N") {
@@ -134,15 +144,12 @@ boolean FYDPMenu::handleInput(String pFunc, String pDir, String pValue)
 		// }
 	// }
 
-	if(pDir.length() > 1 && pDir.substring(1,2) == "B") {
-		isBits = true;
-		debugln("isBits");
-	}
-
-	isBits = true;				//DEBUGGGGGGGG
-	
 	if (pFunc == "P") {				// Pitch
 		debugln("FN: Pitch");
+		
+		if(isDeg) {
+			pVal = PITCH_BIT_TO_DEG * (pVal + PITCH_STRAIGHT_ANG);
+		}
 		
 		debug("Going to = "); debug(pVal); debugln(" [bit]");
 		if(!pitch.goToPos(pVal))
@@ -171,16 +178,20 @@ boolean FYDPMenu::handleInput(String pFunc, String pDir, String pValue)
 	else if (pFunc == "OR") {		// Outer Roll
 		debugln("FN: Outer Roll");
 		
-		// if(isBits) {
-			// debug("Going to = "); debug(pVal); debug(" [bit] \n");
-			// outerRoll.goToPosBit(pVal);
-			// debug("outerRollPos = "); debug(outerRoll.getPosBit()); debug(" [bit] \n");
-		// }
-		// else {
-			// debug("Going to = "); debug(pVal); debug(" [deg] \n");
-			// outerRoll.goToPosDeg(pVal);
-			// debug("outerRollPos = "); debug(outerRoll.getPosDeg()); debug(" [deg] \n");
-		// }
+		debug("Going to = "); debug(pVal); debugln(" [bit]");
+		
+		if(dirStr == "+") {
+			if(!outerRoll.goToPos(pVal,ROLL_O_CW))
+				debugln("Outer Roll CW failed");
+		}
+		else if(dirStr == "-") {
+			if(!outerRoll.goToPos(pVal,!ROLL_O_CW))
+				debugln("Outer Roll CW failed");
+		}
+		else
+			debugln("ERR: Wrist Roll - Invalid direction parameter");
+
+		debug("OuterRoll = "); debug(outerRoll.getPos()); debugln(" [bit]");
 	}
 	else if (pFunc == "T1") {		// Toggle 1
 		if(dirStr == "E")
@@ -214,11 +225,11 @@ boolean FYDPMenu::handleInput(String pFunc, String pDir, String pValue)
 	}
 	else if (pFunc == "G") {		// Gripper
 		debugln("FN: Grip");
-		
-		if(abs(toggle1.getPos() - TOG1_DISENGAGE) > NED_TOL*2 && 
-					abs(toggle2.getPos() - TOG2_DISENGAGE) > NED_TOL*2) {
+
+		if(!(toggle1.isAtPos(TOG1_DISENGAGE)) &&
+		   !(toggle2.isAtPos(TOG2_DISENGAGE))) {
 			_setError("ERR: Grip - Both toggles engaged.");
-			Serial.println("here9");
+			// Serial.println("here9");
 		}
 		else {
 			if(dirStr == "C")
@@ -226,13 +237,13 @@ boolean FYDPMenu::handleInput(String pFunc, String pDir, String pValue)
 			else if(dirStr == "O")
 				pVal = GRIP_OPEN;
 				
-			debugln("here0");
+			// debugln("here0");
 			
 			debug("Going to = "); debug((int)(2)); debugln(" [bit]");
 			gripper.goToPos(pVal);
 			debug("Toggle1Pos = "); debug(gripper.getPos()); debugln(" [bit]");
 		}
-		Serial.println("here1");
+		// Serial.println("here1");
 	}
 	else if (pFunc == "N") {		// Gripper
 		debugln("FN: GripNeedle");
@@ -247,7 +258,7 @@ boolean FYDPMenu::handleInput(String pFunc, String pDir, String pValue)
 		else
 			toTog1 = true;
 				
-		if(pDir == "T"){
+		if(dirStr == "T"){
 
 			debugln("close");
 			if(!gripper.isAtPos(GRIP_CLOSED)){
@@ -279,7 +290,7 @@ boolean FYDPMenu::handleInput(String pFunc, String pDir, String pValue)
 				}
 			}
 		}
-		else if(pDir == "D"){
+		else if(dirStr == "D"){
 			if(!gripper.isAtPos(GRIP_CLOSED)){
 				_setError("ERR: Drop - Gripper must be closed");
 				return FAIL;
@@ -299,8 +310,17 @@ boolean FYDPMenu::handleInput(String pFunc, String pDir, String pValue)
 		}
 		else
 		  _setError("Invalid Needle param: {T,F,L}");
+		
 	}
-
+	else if(pFunc == "E"){
+		Serial.print(analogRead(A0)); Serial.print("\t\t");
+		Serial.print(analogRead(A1)); Serial.print("\t\t");
+		Serial.print(analogRead(A2)); Serial.print("\t\t");
+		Serial.print(analogRead(A3)); Serial.print("\t\t");
+		Serial.print(analogRead(A4)); Serial.print("\t\t");
+		Serial.print(analogRead(A5)); Serial.print("\t\t");
+		Serial.print("\n");
+	}
 	else
   		_setError("Invalid function parameter. {P,WR,OR,T1,T2,G,N,C}");
     
