@@ -5,10 +5,13 @@
 
 FYDPMenu::FYDPMenu()
 {
-  _param[0].reserve(50);
-  _param[1].reserve(50);
-  _param[2].reserve(50);
-
+  // _param[0].reserve(50);
+  // _param[1].reserve(50);
+  // _param[2].reserve(50);
+  _param[0] = "";
+  _param[1] = "";
+  _param[2] = "";
+  
   resetMenu();
   
   
