@@ -2,8 +2,7 @@
 #define LinearActuator_h
 
 #include "Arduino.h"
-
-/****** ASSUME ALL POSITIONS IN BITS!!!!!!!!!!!! *****/
+#include "Constants.h"
 
 class LinearActuator
 {  

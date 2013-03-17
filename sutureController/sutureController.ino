@@ -6,9 +6,8 @@ FYDPMenu menu;
 
 void setup()
 {     
+	// Serial.begin(4800);
 	Serial.begin(9600);
-
-	menu = FYDPMenu();
 
 	pinMode(LIN_DIR_PIN, OUTPUT);  
 	digitalWrite(LIN_DIR_PIN, LOW);
@@ -19,9 +18,12 @@ void setup()
 	pinMode(STEP_NSLEEP, OUTPUT);
 	digitalWrite(STEP_NSLEEP, LOW);
 
+	menu = FYDPMenu();
 
-	debugln("SETUP - SETUP - SETUP - SETUP - SETUP - SETUP");
+	Serial.println("SETUP - SETUP - SETUP - SETUP - SETUP - SETUP");
 
+	delay(500);
+	
 	printWelcome();
 }
 
@@ -63,7 +65,7 @@ void loop()
     menu.resetMenu();
   }
   else if (menu.cmdReady()) {
-    debugln(menu.getParam(0) + "," + menu.getParam(1) + "," + menu.getParam(2));
+    // Serial.println(menu.getParam(0) + "," + menu.getParam(1) + "," + menu.getParam(2));
     
     //Handle new command. True implies error
     if(menu.handleInput(menu.getParam(0), menu.getParam(1), menu.getParam(2)) == FAIL)
@@ -72,16 +74,13 @@ void loop()
     menu.resetMenu();
     printWelcome();
   }
-  // debug(".");
-  
-  Serial.flush();
-  
+
   delay(1000);                  
 }
 
 void menuError()                //Fire upon error processing serial input
 {
-    debugln(menu.getError()); 
+    Serial.println(menu.getError()); 
     delay(100);                 //Wait to see if any more characters are arriving
     while (Serial.read() >= 0);  //Flush buffer
 }
@@ -89,27 +88,27 @@ void menuError()                //Fire upon error processing serial input
 void printWelcome()
 {
   if(DEBUG_MODE) { 
-    debugln("\n\nPlease enter [P1, P2, P3]: P1 = {P,WR,OR,T1,T2,G,N,V}; P2 = {A, I}; P3 = {#}"); 
-    debug(">");
+    Serial.println("\n\nPlease enter [P1, P2, P3]: P1 = {P,WR,OR,T1,T2,G,N,V}; P2 = {A, I}; P3 = {#}"); 
+    Serial.print(">");
   }    
   else { 
-    debugln("\n\nPlease select a function: {Pitch (p), Wrist Roll (wr), Outer Roll (or), or Toggle Needle (t)}, {Desired Angle (if necessary)}"); 
+    Serial.println("\n\nPlease select a function: {Pitch (p), Wrist Roll (wr), Outer Roll (or), or Toggle Needle (t)}, {Desired Angle (if necessary)}"); 
   }
 }
 
-void debug(String message) { 
-	Serial.print(message); 
-}
-void debugln(String message) { 
-	Serial.println(message); 
-}
+// void debug(String message) { 
+	// Serial.print(message); 
+// }
+// void debugln(String message) { 
+	// Serial.println(message); 
+// }
 
-void debug(char* message)
-{ debug((String)message); }
-void debugln(char* message)
-{ debugln((String)message); }
+// void debug(char* message)
+// { debug((String)message); }
+// void debugln(char* message)
+// { debugln((String)message); }
 
-void debug(int message)
-{ debug((String)message); }
-void debugln(int message)
-{ debugln((String)message); }
+// void debug(int message)
+// { debug((String)message); }
+// void debugln(int message)
+// { debugln((String)message); }

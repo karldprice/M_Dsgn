@@ -15,12 +15,12 @@ const boolean PASS       = true;
 
 /********************** PRINT CONSTANTS ****************************/
 
-void debug(String message);
-void debugln(String message);
-void debug(char* message);
-void debugln(char* message);
-void debug(int message);
-void debugln(int message);
+// void debug(String message);
+// void debugln(String message);
+// void debug(char* message);
+// void debugln(char* message);
+// void debug(int message);
+// void debugln(int message);
 
 /*********************** POS FEEDBACK ********************************/
 const int PITCH   = 0;

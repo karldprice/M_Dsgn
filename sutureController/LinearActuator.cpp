@@ -1,8 +1,4 @@
-#include "Arduino.h"
-#include "Constants.h"
 #include "LinearActuator.h"
-// #include "ToggleGrip.h"
-
 
 /****** ASSUME ALL POSITIONS IN BITS!!!!!!!!!!!! *****/
 LinearActuator::LinearActuator()
@@ -72,11 +68,11 @@ bool LinearActuator::goToPos(int desPosBit)
 	bool extend;
 	
 	if(!isValidPos(desPosBit)) {
-		debug("ERR: Invalid toggle destination: "); debugln(desPosBit);
+		Serial.print("ERR: Invalid toggle destination: "); Serial.println(desPosBit);
 		return false;
 	}
 	if(_isAtPos(curPosBit, desPosBit)) {
-		debug("WARN: Toggle already at position: "); debugln(desPosBit);
+		// Serial.print("WARN: Toggle already at position: "); Serial.println(desPosBit);
 		return true;
 	}
 	
@@ -90,18 +86,16 @@ bool LinearActuator::goToPos(int desPosBit)
 		digitalWrite(LIN_DIR_PIN, LOW); 	//Retract
 	}
 
-	
-	
 	int cnt = 0;
 	while(!_isAtPos(curPosBit, desPosBit)) {
 		if(_limitReached(curPosBit,extend)) {
 			digitalWrite(_enPin, LOW); 
-			debug("ERR: Toggle limit reached: "); debugln(desPosBit);
+			Serial.print("ERR: Toggle limit reached: "); Serial.println(desPosBit);
 			return FAIL;
 		}
 		else if(++cnt > 250) {
 			digitalWrite(_enPin, LOW); 
-			debug("ERR: Toggle timeout: "); debugln(desPosBit);
+			Serial.print("ERR: Toggle timeout: "); Serial.println(desPosBit);
 			return FAIL;
 		}
 		
@@ -115,154 +109,6 @@ bool LinearActuator::goToPos(int desPosBit)
 			(_isGripper) ? delay(GRIP_DUTY_OFF) : delay(LIN_DUTY_OFF);
 		
 		curPosBit = getPos();
-		// debug("pos - ");
-		debugln((String)curPosBit);
+		// Serial.println((String)curPosBit);
 	}
 }
-
-/*
-
-
-
-
-int LinearActuator::goToPos(int desPos)
-{
-  int curPos = getPos();
-  
-  //check if already at Position
-  if(abs(curPos-desPos) < NED_TOL)
-    return PASS;
-    
-  boolean extend = (curPos < desPos);
-
-  int limit;  
-  
-  //REMOVED WIGGLE_ROOM (x6)
-  if(extend) { 					
-    if(_posPin == TOG1_POS_PIN)
-      limit = TOG1_RETRACT;
-    else if (_posPin == TOG2_POS_PIN)
-      limit = TOG2_RETRACT;
-    else if(_posPin == GRIP_POS_PIN)
-      limit = GRIP_EXTEND; 
-      
-    if(desPos > limit) {
-      debug("ERR: Requested LinAct position ouside limit. Max: ");  debugln(limit);
-    }
-    else
-      extendAct(curPos, desPos, limit); 
-  }
-  else { 
-    if(_posPin == TOG1_POS_PIN)
-      limit = TOG1_ENGAGE;
-    else if (_posPin == TOG2_POS_PIN)
-      limit = TOG2_ENGAGE;
-    else if(_posPin == GRIP_POS_PIN)
-      limit = GRIP_RETRACT; 
-      
-    if(desPos < limit) {
-      debug("ERR: Requested LinAct position ouside limit. Min: ");  debugln(limit);
-    }
-    else
-      retractAct(curPos, desPos, limit); 
-  }
-  
-  if(abs(curPos-desPos) < NED_TOL)
-  {
-    debug("LinAct Success - "); debugln(getPos());
-    return PASS;
-  }
-  else
-  {
-    debug("ERR: LinAct Did Not Reach Destination - ");  debugln(getPos());
-    return FAIL;
-  }
-  
-//  boolean complete;
-//  //check reached desiredPosition
-//  for(int attempt = 0; attempt < 3; attempt++)
-//  {
-//    curPos = getPos();
-//    debug("curPos = "); debug(curPos); debug("\t , desPos = "); debug(desPos);
-//    complete = abs((curPos - desPos)) < (2*NED_TOL);
-//    if(complete) { debug("  -  Got there\n"); return PASS; }
-//    
-//    //else, try again
-//    debug("  - Re-attempt move\n"); 
-//    
-//    extend = (curPos < desPos);
-//    if(extend) { extendAct(curPos, desPos, limit); }
-//    else { retractAct(curPos, desPos, limit); }
-//  }
-}
-
-void LinearActuator::moveBySteps(int numSteps, boolean extend)
-{
-  int curPos = getPos();
-  if(extend) { 
-    goToPos(curPos + numSteps); 
-  } else {
-    goToPos(curPos - numSteps); 
-  }
-  return;
-}
-
-void LinearActuator::extendAct(int curPos, int desPos, int limit)
-{
-  debug("LinAct Extend: desPos = "); debugln(desPos);
-  
-  //set direction
-  digitalWrite(LIN_DIR_PIN, HIGH); 
-  
-  //enable lin act
-  digitalWrite(_enPin, HIGH); 
-
-  int counter = 0;
-  while(curPos < (desPos - NED_TOL)) {    
-    curPos = getPos();   
-
-    if(curPos >= limit) {
-      debugln("ERR: LinAct Extend Limit");
-      break;
-    }
-    else if(++counter > 500)    // Quit if taking too long
-    {
-      debugln("ERR: LinAct Extend Timeout");
-      break;
-    }
-  } 
-  
-  //disable lin act once reach desired position
-  digitalWrite(_enPin, LOW);  
-}
-
-void LinearActuator::retractAct(int curPos, int desPos, int limit)
-{
-  debug("LinAct Retract: desPos = "); debugln(desPos);
-  
-  //set direction
-  digitalWrite(LIN_DIR_PIN, LOW); 
-  
-  //enable lin act
-  digitalWrite(_enPin, HIGH); 
-
-  int counter = 0;
-  while(curPos > (desPos + NED_TOL)) {
-    curPos = getPos();       
-
-    if(curPos <= limit) {
-      debugln("ERR: LinAct Retract Limit");
-      break;
-    }
-    
-    if(++counter > 500)    // Quit if taking too long
-    {
-      debugln("ERR: LinAct Retract Timeout");
-      break;
-    }
-  }  
-  
-  //disable lin act once reach desired position
-  digitalWrite(_enPin, LOW);  
-}
-*/

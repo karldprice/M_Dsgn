@@ -1,31 +1,20 @@
 #include "FYDPMenu.h"
-// #include "ToggleGrip.h"
-// #include "Pitch.h"
-// #include "Roll.h"
 
 FYDPMenu::FYDPMenu()
 {
-  // _param[0].reserve(50);
-  // _param[1].reserve(50);
-  // _param[2].reserve(50);
-  _param[0] = "";
-  _param[1] = "";
-  _param[2] = "";
-  
-  resetMenu();
-  
-  
-  toggle1 = LinearActuator(TOG1_EN_PIN,TOG1_POS_PIN,TOG1_DISENGAGE,TOG1_ENGAGE);
-  toggle2 = LinearActuator(TOG2_EN_PIN,TOG2_POS_PIN,TOG2_DISENGAGE,TOG2_ENGAGE);
-  gripper = LinearActuator(GRIP_EN_PIN,GRIP_POS_PIN,GRIP_CLOSED,GRIP_OPEN);
-  
+	_param[0] = String("");
+	_param[1] = String("");
+	_param[2] = String("");
+	_errorStr = String("");
+	resetMenu();
+
+	toggle1 = LinearActuator(TOG1_EN_PIN,TOG1_POS_PIN,TOG1_DISENGAGE,TOG1_ENGAGE);
+	toggle2 = LinearActuator(TOG2_EN_PIN,TOG2_POS_PIN,TOG2_DISENGAGE,TOG2_ENGAGE);
+	gripper = LinearActuator(GRIP_EN_PIN,GRIP_POS_PIN,GRIP_CLOSED,GRIP_OPEN);
+
 	pitch = StepperMotor(PITCH_POS_PIN, PITCH_STEP_PIN, PITCH_STRAIGHT, PITCH_CURLED);
 	outerRoll = StepperMotor(ROLL_O_POS_PIN, ROLL_O_STEP_PIN, ROLL_MIN, ROLL_MAX);
 	wristRoll = StepperMotor(ROLL_W_POS_PIN, ROLL_W_STEP_PIN, ROLL_MIN, ROLL_MAX);
-  // toggleGrip = ToggleGrip();
-  // pitch = Pitch();
-  // outerRoll = Roll();
-  // wristRoll = Roll();
 }
 
 void FYDPMenu::resetMenu()
@@ -55,7 +44,7 @@ String FYDPMenu::getError() {
 }
 
 void FYDPMenu::_setError(String errMsg) {
-  _errorStr = errMsg;
+  _errorStr = "ERR:" + errMsg;
   _error = true;
 }
 
@@ -66,26 +55,23 @@ boolean FYDPMenu::doneCmd() {
      _commandReady = true;
      return true;
    }
-   
    return false;
 }
 
 boolean FYDPMenu::addChar(char inChar) {
-//debug("add c- "); debug(_commandReady); debug("add e- "); debugln(_error);
-
   if(!_commandReady && !_error) { 
       if(_pIdx != 2 && _param[_pIdx].length() >= 2) {
-        _setError("Err: Too many characters");
+        _setError("Too many chars");
       }
       if(_pIdx == 2 && !isDigit(inChar))
-        _setError("Err: 3rd parameter must be numeric");
+        _setError("3rd param not num");
       else {
         _param[_pIdx] += inChar;
         return true;
       }
   }
 
-  debug("fail - "); debugln(getError());
+  Serial.print("fail - "); Serial.println(getError());
   return false;
 }
 
@@ -106,20 +92,20 @@ boolean FYDPMenu::nxtParam() {
   }
   else {
     _error = true;
-    _errorStr = "Error: too many parameters";
+    _errorStr = "Too many params";
     return false;
   }
 }
 
 boolean FYDPMenu::handleInput(String pFunc, String pDir, String pValue)
 {
-	debug(pFunc); debug(" , "); debug(pDir); debug(" , "); debugln(pValue); 
+	Serial.print(pFunc); Serial.print(" , "); Serial.print(pDir); Serial.print(" , "); Serial.println(pValue); 
  
 	int pVal = pValue.toInt();
-	
-	boolean isMM = false;
-	boolean isDeg = false;
-	boolean posDir = false;
+
+	bool isMM = false;
+	bool isDeg = false;
+	bool posDir = false;
 	
 	String dirStr = pDir.substring(0,1);
 	String unitStr = "";
@@ -130,196 +116,205 @@ boolean FYDPMenu::handleInput(String pFunc, String pDir, String pValue)
 		else if(pDir.substring(1,2) == "D")
 			isDeg = true;
 		else
-			_setError("Invalid direction parameter");
+			_setError("Invalid direction");
 
-	//If NOT needle or check
-	// if(pFunc != "N" && pFunc != "C" && pFunc != "N") {
-		// if( == "+")
-			// posDir = true;
-		// else if(pDir.substring(0,1) == "-")
-			// posDir = false;
-		// else {
-			// _setError("Invalid direction parameter");
-			// return FAIL;
-		// }
-	// }
-
-	if (pFunc == "P") {				// Pitch
-		debugln("FN: Pitch");
-		
-		if(isDeg) {
-			pVal = PITCH_BIT_TO_DEG * (pVal + PITCH_STRAIGHT_ANG);
-		}
-		
-		debug("Going to = "); debug(pVal); debugln(" [bit]");
-		if(!pitch.goToPos(pVal))
-			debugln("Pitch failed");
-		debug("PitchPos = "); debug(pitch.getPos()); debugln(" [bit]");
-	}
-	else if (pFunc == "WR") {		// Wrist Roll
-		debugln("FN: Wrist Roll");
-		
-		debug("Going to = "); debug(pVal); debugln(" [bit]");
-		
-		if(dirStr == "+") {
-			if(!wristRoll.goToPos(pVal,ROLL_W_CW))
-				debugln("Wrist Roll CW failed");
-		}
-		else if(dirStr == "-") {
-			if(!wristRoll.goToPos(pVal,!ROLL_W_CW))
-				debugln("Wrist Roll CW failed");
-		}
-		else
-			debugln("ERR: Wrist Roll - Invalid direction parameter");
-
-		debug("PitchPos = "); debug(wristRoll.getPos()); debugln(" [bit]");
-
-	}
-	else if (pFunc == "OR") {		// Outer Roll
-		debugln("FN: Outer Roll");
-		
-		debug("Going to = "); debug(pVal); debugln(" [bit]");
-		
-		if(dirStr == "+") {
-			if(!outerRoll.goToPos(pVal,ROLL_O_CW))
-				debugln("Outer Roll CW failed");
-		}
-		else if(dirStr == "-") {
-			if(!outerRoll.goToPos(pVal,!ROLL_O_CW))
-				debugln("Outer Roll CW failed");
-		}
-		else
-			debugln("ERR: Wrist Roll - Invalid direction parameter");
-
-		debug("OuterRoll = "); debug(outerRoll.getPos()); debugln(" [bit]");
-	}
-	else if (pFunc == "T1") {		// Toggle 1
-		if(dirStr == "E")
-			pVal = TOG1_ENGAGE;
-		else if(dirStr == "D")
-			pVal = TOG1_DISENGAGE;
-		
-		if(!gripper.isAtPos(GRIP_CLOSED))
-			_setError("ERR: Toggle1 - Grip not closed.");
-		else {
-			debug("Going to = "); debug(pVal); debug(" [bit] \n");
-			toggle1.goToPos(pVal);
-			debug("Toggle1Pos = "); debug(toggle1.getPos()); debug(" [bit] \n");
-		}
-	}
-	else if (pFunc == "T2") {		// Toggle 2
-		debugln("FN: Toggle 2");
-		
-		if(dirStr == "E")
-			pVal = TOG2_ENGAGE;
-		else if(dirStr == "D")
-			pVal = TOG2_DISENGAGE;
-		
-		if(!gripper.isAtPos(GRIP_CLOSED))
-			_setError("ERR: Toggle1 - Grip not closed.");
-		else {
-			debug("Going to = "); debug(pVal); debug(" [bit] \n");
-			toggle2.goToPos(pVal);
-			debug("Toggle1Pos = "); debug(toggle2.getPos()); debug(" [bit] \n");
-		}
-	}
-	else if (pFunc == "G") {		// Gripper
-		debugln("FN: Grip");
-
-		if(!(toggle1.isAtPos(TOG1_DISENGAGE)) &&
-		   !(toggle2.isAtPos(TOG2_DISENGAGE))) {
-			_setError("ERR: Grip - Both toggles engaged.");
-			// Serial.println("here9");
-		}
-		else {
-			if(dirStr == "C")
-				pVal = GRIP_CLOSED;
-			else if(dirStr == "O")
-				pVal = GRIP_OPEN;
-				
-			// debugln("here0");
 			
-			debug("Going to = "); debug((int)(2)); debugln(" [bit]");
-			gripper.goToPos(pVal);
-			debug("Toggle1Pos = "); debug(gripper.getPos()); debugln(" [bit]");
+	if(!isError()){ 
+		if (pFunc == "P") {				// Pitch
+			// Serial.println("FN: Pitch");
+			
+			if(isDeg) {
+				Serial.println("DEG");
+				if(pVal < PITCH_STRAIGHT_ANG)
+					_setError("Pitch angle too small.");
+				else if(pVal > PITCH_CURLED_ANG)
+					_setError("Pitch angle too large.");
+				else
+					pVal = PITCH_STRAIGHT + (pVal - ROLL_MIN_ANGLE) / ROLL_BIT_TO_DEG;
+			}
+			if(!isError()) {
+				// Serial.print("Going to = "); Serial.print(pVal); Serial.println(" [bit]");
+				if(!pitch.goToPos(pVal))
+					_setError("Pitch failed.");
+				// Serial.print("PitchPos = "); Serial.print(pitch.getPos()); Serial.println(" [bit]");
+			}
 		}
-		// Serial.println("here1");
-	}
-	else if (pFunc == "N") {		// Gripper
-		debugln("FN: GripNeedle");
-		bool toTog1;
-		
-		if(toggle1.isAtPos(TOG1_ENGAGE))
-			toTog1 = false;
-		else if(toggle2.isAtPos(TOG2_ENGAGE))
-			toTog1 = true;
-		else if(abs(toggle1.getPos() - TOG1_ENGAGE) < abs(toggle2.getPos() - TOG2_ENGAGE))
-			toTog1 = false;
-		else
-			toTog1 = true;
+		else if (pFunc == "WR") {		// Wrist Roll
+			// Serial.println("FN: Wrist Roll");
+			
+			// if(isDeg) {
+				// if(pVal < PITCH_STRAIGHT)
+					
 				
-		if(dirStr == "T"){
+			// }
+			
+			Serial.print("Going to = "); Serial.print(pVal); Serial.println(" [bit]");
+			
+			if(dirStr == "+") {
+				if(!wristRoll.goToPos(pVal,ROLL_W_CW))
+					Serial.println("WR - CW failed");
+			}
+			else if(dirStr == "-") {
+				if(!wristRoll.goToPos(pVal,!ROLL_W_CW))
+					Serial.println("WR - CW failed");
+			}
+			else
+				Serial.println("WR - Invalid direction parameter");
 
-			debugln("close");
-			if(!gripper.isAtPos(GRIP_CLOSED)){
-				_setError("ERR: Toggle - Gripper must be closed");
-				return FAIL;
-			}
-			debugln("t1c");
-			if(!toggle1.goToPos(TOG1_ENGAGE)){
-				_setError("ERR: Toggle - T1 failed to engage");
-				return FAIL;
-			}
-			debugln("t2c");
-			if(!toggle2.goToPos(TOG2_ENGAGE)){
-				_setError("ERR: Toggle - T2 failed to engage");
-				return FAIL;
+			Serial.print("PitchPos = "); Serial.print(wristRoll.getPos()); Serial.println(" [bit]");
+
+		}
+		else if (pFunc == "OR") {		// Outer Roll
+			// Serial.println("FN: Outer Roll");
+			
+			if(isDeg) {
+				pVal = ROLL_BIT_TO_DEG * (pVal + ROLL_MIN_ANGLE);
 			}
 			
-			debugln("dhg,c");
-			if(!toTog1) {
+			Serial.print("Going to = "); Serial.print(pVal); Serial.println(" [bit]");
+			
+			if(dirStr == "+") {
+				if(!outerRoll.goToPos(pVal,ROLL_O_CW))
+					Serial.println("Outer Roll CW failed");
+			}
+			else if(dirStr == "-") {
+				if(!outerRoll.goToPos(pVal,!ROLL_O_CW))
+					Serial.println("Outer Roll CW failed");
+			}
+			else
+				Serial.println("Wrist Roll - Invalid direction parameter");
+
+			Serial.print("OuterRoll = "); Serial.print(outerRoll.getPos()); Serial.println(" [bit]");
+		}
+		else if (pFunc == "T1") {		// Toggle 1
+			if(dirStr == "E")
+				pVal = TOG1_ENGAGE;
+			else if(dirStr == "D")
+				pVal = TOG1_DISENGAGE;
+			
+			if(!gripper.isAtPos(GRIP_CLOSED))
+				_setError("Toggle1 - Grip not closed.");
+			else {
+				Serial.print("Going to = "); Serial.print(pVal); Serial.print(" [bit] \n");
+				toggle1.goToPos(pVal);
+				Serial.print("Toggle1Pos = "); Serial.print(toggle1.getPos()); Serial.print(" [bit] \n");
+			}
+		}
+		else if (pFunc == "T2") {		// Toggle 2
+			Serial.println("FN: Toggle 2");
+			
+			if(dirStr == "E")
+				pVal = TOG2_ENGAGE;
+			else if(dirStr == "D")
+				pVal = TOG2_DISENGAGE;
+			
+			if(!gripper.isAtPos(GRIP_CLOSED))
+				_setError("Toggle1 - Grip not closed.");
+			else {
+				Serial.print("Going to = "); Serial.print(pVal); Serial.print(" [bit] \n");
+				toggle2.goToPos(pVal);
+				Serial.print("Toggle1Pos = "); Serial.print(toggle2.getPos()); Serial.print(" [bit] \n");
+			}
+		}
+		else if (pFunc == "G") {		// Gripper
+			Serial.println("FN: Grip");
+
+			if(!(toggle1.isAtPos(TOG1_DISENGAGE)) &&
+			   !(toggle2.isAtPos(TOG2_DISENGAGE))) {
+				_setError("Grip - Both toggles engaged.");
+				// Serial.println("here9");
+			}
+			else {
+				if(dirStr == "C")
+					pVal = GRIP_CLOSED;
+				else if(dirStr == "O")
+					pVal = GRIP_OPEN;
+					
+				// Serial.println("here0");
+				
+				Serial.print("Going to = "); Serial.print((int)(2)); Serial.println(" [bit]");
+				gripper.goToPos(pVal);
+				Serial.print("Toggle1Pos = "); Serial.print(gripper.getPos()); Serial.println(" [bit]");
+			}
+			// Serial.println("here1");
+		}
+		else if (pFunc == "N") {		// Gripper
+			Serial.println("FN: GripNeedle");
+			bool toTog1;
+			
+			if(toggle1.isAtPos(TOG1_ENGAGE))
+				toTog1 = false;
+			else if(toggle2.isAtPos(TOG2_ENGAGE))
+				toTog1 = true;
+			else if(abs(toggle1.getPos() - TOG1_ENGAGE) < abs(toggle2.getPos() - TOG2_ENGAGE))
+				toTog1 = false;
+			else
+				toTog1 = true;
+					
+			if(dirStr == "T"){
+
+				Serial.println("close");
+				if(!gripper.isAtPos(GRIP_CLOSED)){
+					_setError("Toggle - Gripper must be closed");
+					return FAIL;
+				}
+				Serial.println("t1c");
+				if(!toggle1.goToPos(TOG1_ENGAGE)){
+					_setError("Toggle - T1 failed to engage");
+					return FAIL;
+				}
+				Serial.println("t2c");
+				if(!toggle2.goToPos(TOG2_ENGAGE)){
+					_setError("Toggle - T2 failed to engage");
+					return FAIL;
+				}
+				
+				Serial.println("dhg,c");
+				if(!toTog1) {
+					if(!toggle1.goToPos(TOG1_DISENGAGE)){
+						_setError("Toggle - T1 failed to disengage");
+						return FAIL;
+					}
+				}
+				else {
+					if(!toggle2.goToPos(TOG2_DISENGAGE)){
+						_setError("Toggle - T2 failed to disengage");
+						return FAIL;
+					}
+				}
+			}
+			else if(dirStr == "D"){
+				if(!gripper.isAtPos(GRIP_CLOSED)){
+					_setError("Drop - Gripper must be closed");
+					return FAIL;
+				}
 				if(!toggle1.goToPos(TOG1_DISENGAGE)){
-					_setError("ERR: Toggle - T1 failed to disengage");
+					_setError("Drop - T1 failed to disengage");
+					return FAIL;
+				}
+				if(!toggle2.goToPos(TOG2_DISENGAGE)){
+					_setError("Drop - T2 failed to disengage");
+					return FAIL;
+				}
+				if(!gripper.goToPos(GRIP_OPEN)){
+					_setError("Drop - Grip failed to open");
 					return FAIL;
 				}
 			}
 			else {
-				if(!toggle2.goToPos(TOG2_DISENGAGE)){
-					_setError("ERR: Toggle - T2 failed to disengage");
-					return FAIL;
-				}
+			  _setError("N - Dir Param: {T,F,L}");
 			}
 		}
-		else if(dirStr == "D"){
-			if(!gripper.isAtPos(GRIP_CLOSED)){
-				_setError("ERR: Drop - Gripper must be closed");
-				return FAIL;
-			}
-			if(!toggle1.goToPos(TOG1_DISENGAGE)){
-				_setError("ERR: Drop - T1 failed to disengage");
-				return FAIL;
-			}
-			if(!toggle2.goToPos(TOG2_DISENGAGE)){
-				_setError("ERR: Drop - T2 failed to disengage");
-				return FAIL;
-			}
-			if(!gripper.goToPos(GRIP_OPEN)){
-				_setError("ERR: Drop - Grip failed to open");
-				return FAIL;
-			}
-		}
-		else
-		  _setError("Invalid Needle param: {T,F,L}");
 		
 	}
 	else if(pFunc == "E"){
-		Serial.print(analogRead(A0)); Serial.print("\t\t");
-		Serial.print(analogRead(A1)); Serial.print("\t\t");
-		Serial.print(analogRead(A2)); Serial.print("\t\t");
-		Serial.print(analogRead(A3)); Serial.print("\t\t");
-		Serial.print(analogRead(A4)); Serial.print("\t\t");
-		Serial.print(analogRead(A5)); Serial.print("\t\t");
-		Serial.print("\n");
+		Serial.print("T1:");Serial.print(analogRead(A2)); Serial.print("\t\t");
+		Serial.print("T2:");Serial.print(analogRead(A0)); Serial.print("\t\t");
+		Serial.print("G:");Serial.print(analogRead(A1)); Serial.print("\t\t");
+		Serial.print("P");Serial.print(analogRead(A3)); Serial.print("\t\t");
+		Serial.print("OR");Serial.print(analogRead(A4)); Serial.print("\t\t");
+		Serial.print("WR");Serial.print(analogRead(A5)); Serial.print("\t\t");
+		Serial.println("");
 	}
 	else
   		_setError("Invalid function parameter. {P,WR,OR,T1,T2,G,N,C}");
