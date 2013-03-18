@@ -25,7 +25,7 @@ void setup()
 
 	delay(500);
 
-	printWelcome();
+	// printWelcome();
 }
 
 void softReset()
@@ -73,7 +73,7 @@ void loop()
       menuError();
 
     menu.resetMenu();
-    printWelcome();
+    // printWelcome();
   }
 
   delay(1000);   

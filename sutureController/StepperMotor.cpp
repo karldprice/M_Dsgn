@@ -95,10 +95,10 @@ bool StepperMotor::goToPos(int desPosBit, bool isCW) {
 		
 		curPosBit = getPos();
 
-                if(curPosBit % 5 == 0 && temp != curPosBit) {
-                  temp = curPosBit;
-		  Serial.println(or,curPosBit);
-                }
+		if(curPosBit % 5 == 0 && temp != curPosBit) {
+		  temp = curPosBit;
+		  Serial.println(curPosBit);
+        }
 	} 
 	
 	digitalWrite(STEP_NSLEEP, LOW);

@@ -283,7 +283,7 @@ boolean FYDPMenu::handleInput(String pFunc, String pDir, String pValue)
 			  _setError("N - Dir Param: {T,F,L}");
 			}
 		}
-		else if(pFunc == "E"){
+		else if(pFunc == "C"){
 			int retVal = -1;
 
 			if(dirStr == "P")
@@ -293,7 +293,10 @@ boolean FYDPMenu::handleInput(String pFunc, String pDir, String pValue)
 			else if(dirStr == "O")
 				retVal = pB2D(outerRoll.getPos());
 			else if(dirStr == "G")
-				retVal = pB2D(gripper.getPos());
+				if(gripper.isAtPos(GRIP_CLOSED))
+					retVal = 1;
+				else if(gripper.isAtPos(GRIP_OPEN))
+					retVal = 2;	
 			else if(dirStr == "N") {
 				if(toggle1.isAtPos(TOG1_ENGAGE))
 					retVal = 1;
@@ -301,7 +304,7 @@ boolean FYDPMenu::handleInput(String pFunc, String pDir, String pValue)
 					retVal = 2;	
 			}
 			
-			Serial.println(retVal);
+			Serial.print("pos,"); Serial.println(retVal);
 		}
 	}
 	else
