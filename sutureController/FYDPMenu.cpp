@@ -156,7 +156,7 @@ boolean FYDPMenu::handleInput(String pFunc, String pDir, String pValue)
 					Serial.println("WR - Invalid direction parameter");
 			}
 			// Serial.print("POS,WR,"); Serial.println(wrB2D(wristRoll.getPos()));
-			Serial.print("POS,WR,"); Serial.println(wrB2D(wristRoll.getPos()));
+			Serial.print("POS,W,"); Serial.println(wrB2D(wristRoll.getPos()));
 		}
 		else if (pFunc == "OR") {		// Outer Roll
 			if(isDeg) {
@@ -174,7 +174,7 @@ boolean FYDPMenu::handleInput(String pFunc, String pDir, String pValue)
 			else
 				Serial.println("OR - Invalid direction parameter");
 				
-			Serial.print("POS,OR,"); Serial.println(orB2D(outerRoll.getPos()));
+			Serial.print("POS,O,"); Serial.println(orB2D(outerRoll.getPos()));
 		}
 		else if (pFunc == "T1") {		// Toggle 1
 			if(dirStr == "E")

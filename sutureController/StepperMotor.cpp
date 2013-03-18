@@ -77,29 +77,32 @@ bool StepperMotor::goToPos(int desPosBit, bool isCW) {
 	
 	unsigned long startTime =  millis();
         int temp = 0;
+	
+	for(int i =0; i<3 || !_isAtPos(curPosBit, desPosBit); i++) {
+		while(!_isAtPos(curPosBit, desPosBit)) {
+			if(_limitReached(curPosBit, isCW)) {
+				Serial.print("ERR: Rotation limit: "); Serial.println(desPosBit);
+				return FAIL;
+			}
+			else if(millis() - startTime > TIMEOUT) {
+				Serial.print("ERR: Stepper timeout: "); Serial.println(desPosBit);
+				digitalWrite(STEP_NSLEEP, LOW);
+				return FAIL;
+			}
+			else if(abs(curPosBit - desPosBit) < 10)
+				_performStep(_stepDelay*2); 
+			else
+				_performStep(_stepDelay); 
+			
+			curPosBit = getPos();
 
-	while(!_isAtPos(curPosBit, desPosBit)) {
-		if(_limitReached(curPosBit, isCW)) {
-			Serial.print("ERR: Rotation limit: "); Serial.println(desPosBit);
-			return FAIL;
-		}
-		else if(millis() - startTime > TIMEOUT) {
-			Serial.print("ERR: Stepper timeout: "); Serial.println(desPosBit);
-			digitalWrite(STEP_NSLEEP, LOW);
-			return FAIL;
-		}
-		else if(abs(curPosBit - desPosBit) < 10)
-			_performStep(_stepDelay*2); 
-		else
-			_performStep(_stepDelay); 
-		
-		curPosBit = getPos();
-
-		if(curPosBit % 5 == 0 && temp != curPosBit) {
-		  temp = curPosBit;
-		  Serial.println(curPosBit);
-        }
-	} 
+			if(curPosBit % 5 == 0 && temp != curPosBit) {
+			  temp = curPosBit;
+			  Serial.println(curPosBit);
+			}
+		} 
+		delay(25);
+	}
 	
 	digitalWrite(STEP_NSLEEP, LOW);
 	return PASS;
