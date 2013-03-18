@@ -17,10 +17,10 @@ int pD2B (int degs) {
 }
 
 int wrB2D (int bits){
-int degs = (bits - ROLL_MIN)*ROLL_BIT_TO_DEG - ROLL_W_OFFSET + ROLL_MIN_ANGLE;
-return abs(degs);
-//	int degs = bits*ROLL_BIT_TO_DEG;
-//	return degs;
+//  int degs = (bits - ROLL_MIN)*ROLL_BIT_TO_DEG - ROLL_W_OFFSET + ROLL_MIN_ANGLE;
+//  return abs(degs);
+	int degs = bits*ROLL_BIT_TO_DEG;
+	return degs;
 }
 int wrD2B (int degs){
 //        int bits = ROLL_MIN + (degs - ROLL_MIN_ANGLE + ROLL_W_OFFSET) / ROLL_BIT_TO_DEG;

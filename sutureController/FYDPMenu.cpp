@@ -15,6 +15,10 @@ FYDPMenu::FYDPMenu()
 	pitch = StepperMotor(PITCH_POS_PIN, PITCH_STEP_PIN, PITCH_STRAIGHT, PITCH_CURLED, STEP_DELAY);
 	outerRoll = StepperMotor(ROLL_O_POS_PIN, ROLL_O_STEP_PIN, ROLL_MIN, ROLL_MAX, STEP_DELAY);
 	wristRoll = StepperMotor(ROLL_W_POS_PIN, ROLL_W_STEP_PIN, ROLL_MIN, ROLL_MAX, STEP_DELAY);
+
+       Serial.print("POS,P,"); Serial.println(pB2D(pitch.getPos()));
+       Serial.print("POS,O,"); Serial.println(orB2D(outerRoll.getPos()));
+       Serial.print("POS,W,"); Serial.println(wrB2D(wristRoll.getPos()));
 }
 
 void FYDPMenu::resetMenu()
@@ -152,7 +156,7 @@ boolean FYDPMenu::handleInput(String pFunc, String pDir, String pValue)
 					Serial.println("WR - Invalid direction parameter");
 			}
 			// Serial.print("POS,WR,"); Serial.println(wrB2D(wristRoll.getPos()));
-			Serial.print("POS,WR,"); Serial.println(wristRoll.getPos());
+			Serial.print("POS,WR,"); Serial.println(wrB2D(wristRoll.getPos()));
 		}
 		else if (pFunc == "OR") {		// Outer Roll
 			if(isDeg) {
@@ -181,9 +185,9 @@ boolean FYDPMenu::handleInput(String pFunc, String pDir, String pValue)
 			if(!gripper.isAtPos(GRIP_CLOSED))
 				_setError("Toggle1 - Grip not closed.");
 			else {
-				Serial.print("Going to = "); Serial.print(pVal); Serial.print(" [bit] \n");
+				// Serial.print("Going to = "); Serial.print(pVal); Serial.print(" [bit] \n");
 				toggle1.goToPos(pVal);
-				Serial.print("Toggle1Pos = "); Serial.print(toggle1.getPos()); Serial.print(" [bit] \n");
+				// Serial.print("Toggle1Pos = "); Serial.print(toggle1.getPos()); Serial.print(" [bit] \n");
 			}
 		}
 		else if (pFunc == "T2") {		// Toggle 2
@@ -289,9 +293,9 @@ boolean FYDPMenu::handleInput(String pFunc, String pDir, String pValue)
 			if(dirStr == "P")
 				retVal = pB2D(pitch.getPos());
 			else if(dirStr == "W")
-				retVal = pB2D(wristRoll.getPos());
+				retVal = wrB2D(wristRoll.getPos());
 			else if(dirStr == "O")
-				retVal = pB2D(outerRoll.getPos());
+				retVal = orB2D(outerRoll.getPos());
 			else if(dirStr == "G")
 				if(gripper.isAtPos(GRIP_CLOSED))
 					retVal = 1;
@@ -302,9 +306,14 @@ boolean FYDPMenu::handleInput(String pFunc, String pDir, String pValue)
 					retVal = 1;
 				else if(toggle2.isAtPos(TOG2_ENGAGE))
 					retVal = 2;	
+                        }
+                        else if(dirStr == "A") {
+                           Serial.print("POS,P,"); Serial.println(pB2D(pitch.getPos()));
+                           Serial.print("POS,O,"); Serial.println(orB2D(outerRoll.getPos()));
+                           Serial.print("POS,W,"); Serial.println(wrB2D(wristRoll.getPos()));
 			}
 			
-			Serial.print("pos,"); Serial.println(retVal);
+			Serial.print("pos,"); Serial.print(dirStr); Serial.print(","); Serial.println(retVal);
 		}
 	}
 	else

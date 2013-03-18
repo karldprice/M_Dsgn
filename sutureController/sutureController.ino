@@ -21,7 +21,7 @@ void setup()
 
 	menu = FYDPMenu();
 
-	Serial.println("SETUP - SETUP - SETUP - SETUP - SETUP - SETUP");
+	Serial.println("\t Robotic Suturing Controller");
 
 	delay(500);
 
@@ -66,7 +66,7 @@ void loop()
     menu.resetMenu();
   }
   else if (menu.cmdReady()) {
-    Serial.println(menu.getParam(0) + "," + menu.getParam(1) + "," + menu.getParam(2));
+//    Serial.println(menu.getParam(0) + "," + menu.getParam(1) + "," + menu.getParam(2));
     
     //Handle new command. True implies error
     if(menu.handleInput(menu.getParam(0), menu.getParam(1), menu.getParam(2)) == FAIL)
