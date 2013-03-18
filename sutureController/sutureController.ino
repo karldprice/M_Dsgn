@@ -24,7 +24,7 @@ void setup()
 	Serial.println("SETUP - SETUP - SETUP - SETUP - SETUP - SETUP");
 
 	delay(500);
-	
+
 	printWelcome();
 }
 
@@ -99,29 +99,3 @@ void printWelcome()
     Serial.println("\n\nPlease select a function: {Pitch (p), Wrist Roll (wr), Outer Roll (or), or Toggle Needle (t)}, {Desired Angle (if necessary)}"); 
   }
 }
-
-//Absolute modulus
-int amod(int a, int b)
-{
-   int ret = a % b;
-   if(ret < 0)
-     ret+=b;
-   return ret;
-}
-
-// void debug(String message) { 
-	// Serial.print(message); 
-// }
-// void debugln(String message) { 
-	// Serial.println(message); 
-// }
-
-// void debug(char* message)
-// { debug((String)message); }
-// void debugln(char* message)
-// { debugln((String)message); }
-
-// void debug(int message)
-// { debug((String)message); }
-// void debugln(int message)
-// { debugln((String)message); }

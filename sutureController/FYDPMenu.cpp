@@ -14,7 +14,7 @@ FYDPMenu::FYDPMenu()
 
 	pitch = StepperMotor(PITCH_POS_PIN, PITCH_STEP_PIN, PITCH_STRAIGHT, PITCH_CURLED, STEP_DELAY);
 	outerRoll = StepperMotor(ROLL_O_POS_PIN, ROLL_O_STEP_PIN, ROLL_MIN, ROLL_MAX, STEP_DELAY);
-	wristRoll = StepperMotor(ROLL_W_POS_PIN, ROLL_W_STEP_PIN, ROLL_MIN, ROLL_MAX, 2);
+	wristRoll = StepperMotor(ROLL_W_POS_PIN, ROLL_W_STEP_PIN, ROLL_MIN, ROLL_MAX, STEP_DELAY);
 }
 
 void FYDPMenu::resetMenu()
@@ -117,10 +117,7 @@ boolean FYDPMenu::handleInput(String pFunc, String pDir, String pValue)
 			isDeg = true;
 		else
 			_setError("Invalid direction");
-	
-	// Serial.print("err?: ");
-	// Serial.println(isError());
-	
+
 	if(!isError()){ 
 		if (pFunc == "P") {				// Pitch
 			if(isDeg) {
@@ -129,21 +126,20 @@ boolean FYDPMenu::handleInput(String pFunc, String pDir, String pValue)
 				else if(pVal > PITCH_CURLED_ANG)
 					_setError("Pitch angle too large.");
 				else
-					pVal = PITCH_STRAIGHT + (pVal - PITCH_STRAIGHT_ANG) / ROLL_BIT_TO_DEG;
+					pVal = pD2B(pVal);
 			}
 			if(!isError()) {
 				if(!pitch.goToPos(pVal))
 					_setError("Pitch failed.");
 			}
+			Serial.print("POS,P,"); Serial.println(pB2D(pitch.getPos()));
 		}
 		else if (pFunc == "WR") {		// Wrist Roll
 			if(isDeg) {
-				pVal = ROLL_MIN + (pVal - ROLL_MIN_ANGLE + ROLL_W_OFFSET) / ROLL_BIT_TO_DEG;
-				pVal = amod(pVal,ROLL_MAX);		//Absolute modulus
+				pVal = wrD2B(pVal);
 			}
 			if(!isError()) {
-				Serial.print("Going to = "); Serial.print(pVal); Serial.println(" [bit]");
-				
+
 				if(dirStr == "+") {
 					if(!wristRoll.goToPos(pVal,ROLL_W_CW))
 						Serial.println("WR - CW failed");
@@ -154,19 +150,15 @@ boolean FYDPMenu::handleInput(String pFunc, String pDir, String pValue)
 				}
 				else
 					Serial.println("WR - Invalid direction parameter");
-					
-				Serial.print("WR = "); Serial.print(wristRoll.getPos()); Serial.println(" [bit]");
 			}
-
+			// Serial.print("POS,WR,"); Serial.println(wrB2D(wristRoll.getPos()));
+			Serial.print("POS,WR,"); Serial.println(wristRoll.getPos());
 		}
 		else if (pFunc == "OR") {		// Outer Roll
 			if(isDeg) {
-				pVal = ROLL_MAX - (pVal - ROLL_MIN_ANGLE + ROLL_O_OFFSET) / ROLL_BIT_TO_DEG;
-				pVal = amod(pVal,ROLL_MAX);		//Absolute modulus
+				pVal = orD2B(pVal);
 			}
-			
-			Serial.print("Going to = "); Serial.print(pVal); Serial.println(" [bit]");
-			
+
 			if(dirStr == "+") {
 				if(!outerRoll.goToPos(pVal,ROLL_O_CW))
 					Serial.println("Outer Roll CW failed");
@@ -177,8 +169,8 @@ boolean FYDPMenu::handleInput(String pFunc, String pDir, String pValue)
 			}
 			else
 				Serial.println("OR - Invalid direction parameter");
-
-			Serial.print("OR = "); Serial.print(outerRoll.getPos()); Serial.println(" [bit]");
+				
+			Serial.print("POS,OR,"); Serial.println(orB2D(outerRoll.getPos()));
 		}
 		else if (pFunc == "T1") {		// Toggle 1
 			if(dirStr == "E")
@@ -195,8 +187,7 @@ boolean FYDPMenu::handleInput(String pFunc, String pDir, String pValue)
 			}
 		}
 		else if (pFunc == "T2") {		// Toggle 2
-			Serial.println("FN: Toggle 2");
-			
+
 			if(dirStr == "E")
 				pVal = TOG2_ENGAGE;
 			else if(dirStr == "D")
@@ -205,18 +196,15 @@ boolean FYDPMenu::handleInput(String pFunc, String pDir, String pValue)
 			if(!gripper.isAtPos(GRIP_CLOSED))
 				_setError("Toggle1 - Grip not closed.");
 			else {
-				// Serial.print("Going to = "); Serial.print(pVal); Serial.print(" [bit] \n");
 				toggle2.goToPos(pVal);
-				// Serial.print("Toggle1Pos = "); Serial.print(toggle2.getPos()); Serial.print(" [bit] \n");
 			}
 		}
-		else if (pFunc == "G") {		// Gripper
+		else if (pFunc == "G") {
 			Serial.println("FN: Grip");
 
 			if(!(toggle1.isAtPos(TOG1_DISENGAGE)) &&
 			   !(toggle2.isAtPos(TOG2_DISENGAGE))) {
 				_setError("Grip - Both toggles engaged.");
-				// Serial.println("here9");
 			}
 			else {
 				if(dirStr == "C")
@@ -228,7 +216,7 @@ boolean FYDPMenu::handleInput(String pFunc, String pDir, String pValue)
 					_setError("G - move failed");
 			}
 		}
-		else if (pFunc == "N") {		// Gripper
+		else if (pFunc == "N") {
 			Serial.println("FN: GripNeedle");
 			bool toTog1;
 			
@@ -296,20 +284,29 @@ boolean FYDPMenu::handleInput(String pFunc, String pDir, String pValue)
 			}
 		}
 		else if(pFunc == "E"){
-			Serial.print("POS,T1,"); Serial.println(analogRead(A2));
-			Serial.print("POS,T2,"); Serial.println(analogRead(A0));
-			Serial.print("POS,G,");  Serial.println(analogRead(A1));
-			Serial.print("POS,P,");  Serial.println(analogRead(A3));
-			Serial.print("POS,OR,"); Serial.println(analogRead(A4));
-			Serial.print("POS,WR,"); Serial.println(analogRead(A5));
+			int retVal = -1;
+
+			if(dirStr == "P")
+				retVal = pB2D(pitch.getPos());
+			else if(dirStr == "W")
+				retVal = pB2D(wristRoll.getPos());
+			else if(dirStr == "O")
+				retVal = pB2D(outerRoll.getPos());
+			else if(dirStr == "G")
+				retVal = pB2D(gripper.getPos());
+			else if(dirStr == "N") {
+				if(toggle1.isAtPos(TOG1_ENGAGE))
+					retVal = 1;
+				else if(toggle2.isAtPos(TOG2_ENGAGE))
+					retVal = 2;	
+			}
+			
+			Serial.println(retVal);
 		}
 	}
 	else
   		_setError("Invalid function parameter. {P,WR,OR,T1,T2,G,N}");
-    
-	// Serial.println(pFunc);
-	// Serial.println(getError());
-	
+
 	return !isError();
 
 }

@@ -12,7 +12,7 @@ StepperMotor::StepperMotor(int posPin, int stepPin, int encMin, int encMax, int 
   
   _encMin = encMin;
   _encMax = encMax;
-  
+
   _stepDelay = stepDelay;
   
   pinMode(_posPin, INPUT);
@@ -31,7 +31,7 @@ bool StepperMotor::isValidPos(int posBit) {
 bool StepperMotor::_limitReached(int curPosBit, bool isCW) {
 	if(!_isPitch || isValidPos(curPosBit))
 		return false;
-	else if((curPosBit > _encMax && isCW) || (curPosBit > _encMax && isCW))
+	else if((curPosBit > _encMax && isCW) || (curPosBit < _encMin && !isCW))
 		return false;
 
 	return true;
@@ -74,20 +74,31 @@ bool StepperMotor::goToPos(int desPosBit, bool isCW) {
 
 	digitalWrite(STEP_NSLEEP, HIGH);
 	delay(5);	//According to datasheet - exiting sleep
+	
+	unsigned long startTime =  millis();
+        int temp = 0;
 
 	while(!_isAtPos(curPosBit, desPosBit)) {
 		if(_limitReached(curPosBit, isCW)) {
-			Serial.print("ERR: Toggle limit: "); Serial.println(desPosBit);
+			Serial.print("ERR: Rotation limit: "); Serial.println(desPosBit);
+			return FAIL;
+		}
+		else if(millis() - startTime > TIMEOUT) {
+			Serial.print("ERR: Stepper timeout: "); Serial.println(desPosBit);
 			digitalWrite(STEP_NSLEEP, LOW);
 			return FAIL;
 		}
-		else if(abs(curPosBit - desPosBit) < 5)
+		else if(abs(curPosBit - desPosBit) < 10)
 			_performStep(_stepDelay*2); 
 		else
 			_performStep(_stepDelay); 
 		
 		curPosBit = getPos();
-		// Serial.println(curPosBit);
+
+                if(curPosBit % 5 == 0 && temp != curPosBit) {
+                  temp = curPosBit;
+		  Serial.println(or,curPosBit);
+                }
 	} 
 	
 	digitalWrite(STEP_NSLEEP, LOW);

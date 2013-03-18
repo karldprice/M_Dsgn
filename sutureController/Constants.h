@@ -1,7 +1,8 @@
-#include "Arduino.h"
-
 #ifndef Constants_h
 #define Constants_h
+
+#include "Arduino.h"
+#include "helper.h"
 
 /********************** STANDARD BOOLEANS ****************************/
 const boolean DEBUG_MODE = true;
@@ -14,13 +15,7 @@ const boolean FAIL       = false;
 const boolean PASS       = true;
 
 /********************** PRINT CONSTANTS ****************************/
-int amod(int a, int b);
-// void debug(String message);
-// void debugln(String message);
-// void debug(char* message);
-// void debugln(char* message);
-// void debug(int message);
-// void debugln(int message);
+
 
 /*********************** POS FEEDBACK ********************************/
 const int PITCH   = 0;
@@ -31,12 +26,14 @@ const int T2 	  = 4;
 const int GRIP 	  = 5;
 
 //const int MAX_REACHED_COUNT = 50;
-const int NED_TOL        = 5; 
-const int GRIP_TOL       = 5;
-const int STEP_TOL       = 5; //in case encoder skips over the one required value
+const int NED_TOL       = 5; 
+const int GRIP_TOL      = 5;
+const int STEP_TOL      = 5; //in case encoder skips over the one required value
 
-const int STEP_NSLEEP    = 8;
-const int STEP_DIR       = 9;
+const int STEP_NSLEEP   = 8;
+const int STEP_DIR      = 9;
+
+const int TIMEOUT		= 30000;
 
 /********************** STEPPER MOTORS *******************************/  
 const int STEP_DELAY = 5;
@@ -46,8 +43,8 @@ const int PITCH_POS_PIN         = A3;  //Stepper #1
 const int PITCH_STEP_PIN        = 11;  //Stepper #1
 const int PITCH_STRAIGHT		= 440;  	//fully straight position
 const int PITCH_CURLED          = 700;   //fully curled position      
-const int PITCH_STRAIGHT_ANG    = 2;  	//fully straight angle (for conversion)
-const int PITCH_CURLED_ANG      = 80;   //fully curled angle (for conversion)
+const int PITCH_STRAIGHT_ANG    = 6;  	//fully straight angle (for conversion)
+const int PITCH_CURLED_ANG      = 77;   //fully curled angle (for conversion)
 
 const double PITCH_BIT_TO_DEG = float((PITCH_CURLED_ANG - PITCH_STRAIGHT_ANG))/(PITCH_CURLED - PITCH_STRAIGHT);
 
@@ -59,7 +56,7 @@ const int ROLL_W_OFFSET	 	= -15;	//Angular offset
 
 const int ROLL_O_POS_PIN    = A4;  	//Stepper #2  
 const int ROLL_O_STEP_PIN   = 10;  	//Stepper #2
-const bool ROLL_O_CW 	  	= false;
+const bool ROLL_O_CW 	  	= true;
 const int ROLL_O_OFFSET	 	= 160;	//Angular offset
 
 const int ROLL_MIN          = 0;          
@@ -89,9 +86,9 @@ const double TOG_BIT_TO_MM   = 20.0/983;
 
 /************************ GRIPPER **********************************/ 
 const int GRIP_EN_PIN        = 4;
-const int GRIP_POS_PIN       = A1;   //#3 - big pops
-const int GRIP_OPEN       	 = 150; 	//150
-const int GRIP_CLOSED        = 38; 
+const int GRIP_POS_PIN       = A1;   	//#3 - big pops
+const int GRIP_OPEN       	 = 155; 	//160
+const int GRIP_CLOSED        = 39; 
 
 const int GRIP_DUTY_ON	 	 = 10;	
 const int GRIP_DUTY_OFF	 	 = 10;	

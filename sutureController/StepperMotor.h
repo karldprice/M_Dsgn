@@ -29,6 +29,7 @@ class StepperMotor
 	int _encMin;
 	int _encMax;
 	int _stepDelay;
+	String _posStr;
 	
 	bool _isPitch;
 };

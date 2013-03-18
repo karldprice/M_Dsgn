@@ -86,16 +86,18 @@ bool LinearActuator::goToPos(int desPosBit)
 		digitalWrite(LIN_DIR_PIN, LOW); 	//Retract
 	}
 
-	int cnt = 0;
+	
+	unsigned long startTime =  millis();
+
 	while(!_isAtPos(curPosBit, desPosBit)) {
 		if(_limitReached(curPosBit,extend)) {
 			digitalWrite(_enPin, LOW); 
 			Serial.print("ERR: Toggle limit reached: "); Serial.println(desPosBit);
 			return FAIL;
 		}
-		else if(++cnt > 250) {
+		else if(millis() - startTime > TIMEOUT) {
 			digitalWrite(_enPin, LOW); 
-			Serial.print("ERR: Toggle timeout: "); Serial.println(desPosBit);
+			Serial.print("ERR: LinAct timeout: "); Serial.println(desPosBit);
 			return FAIL;
 		}
 		
