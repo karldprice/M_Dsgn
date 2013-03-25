@@ -76,7 +76,6 @@ boolean FYDPMenu::addChar(char inChar) {
       }
   }
 
-  Serial.print("fail - "); Serial.println(getError());
   return false;
 }
 
@@ -204,7 +203,6 @@ boolean FYDPMenu::handleInput(String pFunc, String pDir, String pValue)
 			}
 		}
 		else if (pFunc == "G") {
-			Serial.println("FN: Grip");
 
 			if(!(toggle1.isAtPos(TOG1_DISENGAGE)) &&
 			   !(toggle2.isAtPos(TOG2_DISENGAGE))) {
@@ -251,7 +249,7 @@ boolean FYDPMenu::handleInput(String pFunc, String pDir, String pValue)
 					return FAIL;
 				}
 				
-				Serial.println("dhg,c");
+				Serial.println("t d");
 				if(!toTog1) {
 					if(!toggle1.goToPos(TOG1_DISENGAGE)){
 						_setError("Toggle - T1 failed to disengage");
@@ -306,14 +304,17 @@ boolean FYDPMenu::handleInput(String pFunc, String pDir, String pValue)
 					retVal = 1;
 				else if(toggle2.isAtPos(TOG2_ENGAGE))
 					retVal = 2;	
-                        }
-                        else if(dirStr == "A") {
-                           Serial.print("POS,P,"); Serial.println(pB2D(pitch.getPos()));
-                           Serial.print("POS,O,"); Serial.println(orB2D(outerRoll.getPos()));
-                           Serial.print("POS,W,"); Serial.println(wrB2D(wristRoll.getPos()));
 			}
 			
-			Serial.print("pos,"); Serial.print(dirStr); Serial.print(","); Serial.println(retVal);
+			if(dirStr == "A") {
+			   Serial.print("POS,P,"); Serial.println(pB2D(pitch.getPos()));
+			   Serial.print("POS,O,"); Serial.println(orB2D(outerRoll.getPos()));
+			   Serial.print("POS,W,"); Serial.println(wrB2D(wristRoll.getPos()));
+			}
+			else
+			{
+				Serial.print("POS,"); Serial.print(dirStr); Serial.print(","); Serial.println(retVal);
+			}
 		}
 	}
 	else

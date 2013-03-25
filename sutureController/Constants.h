@@ -28,7 +28,7 @@ const int GRIP 	  = 5;
 //const int MAX_REACHED_COUNT = 50;
 const int NED_TOL       = 5; 
 const int GRIP_TOL      = 5;
-const int STEP_TOL      = 5; //in case encoder skips over the one required value
+const int STEP_TOL      = 3; //in case encoder skips over the one required value
 
 const int STEP_NSLEEP   = 8;
 const int STEP_DIR      = 9;

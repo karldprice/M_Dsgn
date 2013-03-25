@@ -101,7 +101,8 @@ bool StepperMotor::goToPos(int desPosBit, bool isCW) {
 			  Serial.println(curPosBit);
 			}
 		} 
-		delay(25);
+		delay(100);
+                curPosBit = getPos();
 	}
 	
 	digitalWrite(STEP_NSLEEP, LOW);
