@@ -8,7 +8,6 @@
 const int TIMEOUT = 30000;
 
 /* Standard booleans */
-const boolean DEBUG_MODE = true;
 const boolean OPEN_GRIP  = false; 
 const boolean CLOSE_GRIP = true; 
 const boolean EXTEND     = true;  
